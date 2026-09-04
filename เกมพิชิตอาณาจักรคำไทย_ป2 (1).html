@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>พิชิตอาณาจักรคำไทย - เกมการศึกษา ป.2</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:"Tahoma","Noto Sans Thai",sans-serif;background:linear-gradient(135deg,#ffe7f1,#e9ddff,#dff6ff);color:#34264d;min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:22px}.card{background:#fff;border-radius:28px;padding:28px;box-shadow:0 12px 35px #7c5aa033;margin-top:20px}
+h1{font-size:clamp(28px,6vw,48px);margin:5px 0 8px;color:#7a3fa0;text-align:center}.sub{text-align:center;font-size:18px}
+.badges{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0}.badge{background:#f3e6ff;padding:9px 15px;border-radius:999px;font-weight:bold}
+input{width:100%;padding:15px;border:2px solid #dec9ee;border-radius:14px;font-size:18px;margin:8px 0 16px}
+button{border:0;border-radius:16px;padding:14px 22px;font-size:18px;font-weight:bold;cursor:pointer;background:#8d4db3;color:#fff;box-shadow:0 5px 0 #65337f;transition:.12s}button:active{transform:translateY(4px);box-shadow:0 1px 0 #65337f}button:disabled{opacity:.55;cursor:not-allowed}
+.start{text-align:center}.start button{font-size:22px;padding:16px 34px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.progress{height:14px;background:#eee1f5;border-radius:99px;overflow:hidden;margin:18px 0}.bar{height:100%;background:linear-gradient(90deg,#ff75a0,#9c63e6);width:0%;transition:.3s}
+.question{font-size:23px;font-weight:bold;line-height:1.55;margin:25px 0}.choices{display:grid;gap:13px}.choice{background:#faf7ff;color:#412b55;border:2px solid #e6d9ef;box-shadow:none;text-align:left}.choice:hover{background:#f2e7fb}.choice.correct{background:#d9f8e6;border-color:#36a867}.choice.wrong{background:#ffe0e5;border-color:#e05268}.feedback{min-height:35px;font-size:18px;font-weight:bold;margin:15px 0}
+.hidden{display:none}.result{text-align:center}.score{font-size:52px;font-weight:900;color:#8d4db3}.stars{font-size:38px;margin:12px}.note{background:#fff7d6;border-radius:16px;padding:15px;text-align:left;margin:18px 0}
+textarea{width:100%;min-height:130px;padding:14px;border:2px solid #dec9ee;border-radius:14px;font-size:17px}
+.footer{text-align:center;opacity:.7;margin:18px}
+.small{font-size:14px;opacity:.75}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="start" class="card start">
+<h1>🏰 พิชิตอาณาจักรคำไทย</h1>
+<div class="sub">เกมการศึกษา เรื่อง <b>คำมูล คำประสม คำซ้ำ คำซ้อน</b></div>
+<div class="badges"><span class="badge">🎒 ป.2</span><span class="badge">⏱️ 30 นาที</span><span class="badge">🏆 20 คะแนน</span></div>
+<p>ตอบคำถามให้ถูกต้องเพื่อสะสมคะแนนและพิชิตอาณาจักรคำไทย!</p>
+<input id="name" placeholder="กรอกชื่อ-สกุลของนักเรียน">
+<button onclick="startGame()">🚀 เริ่มเกม</button>
+<p class="small">ตอนที่ 1 มี 12 ด่าน ด่านละ 1 คะแนน</p>
+</div>
+
+<div id="game" class="card hidden">
+<div class="top"><b id="player"></b><span>⭐ คะแนน: <b id="score">0</b></span><span>ด่าน <b id="num">1</b>/12</span></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div id="question" class="question"></div>
+<div id="choices" class="choices"></div>
+<div id="feedback" class="feedback"></div>
+<button id="next" onclick="nextQuestion()" disabled>ไปด่านต่อไป ➜</button>
+</div>
+
+<div id="essay" class="card hidden">
+<h2>✍️ ภารกิจพิเศษ: ตอบคำถามอัตนัย</h2>
+<p><b>ข้อ 1 (2 คะแนน)</b> จำแนกคำ: นาฬิกา, ปากกา, เด็กๆ, ปิดบัง</p>
+<textarea id="e1" placeholder="คำมูล: ...&#10;คำประสม: ...&#10;คำซ้ำ: ...&#10;คำซ้อน: ..."></textarea>
+<p><b>ข้อ 2 (3 คะแนน)</b> แต่งประโยคโดยใช้คำซ้ำ 1 ประโยค พร้อมอธิบายว่าใช้คำซ้ำนั้นเพื่อเน้นความหมายอย่างไร</p>
+<textarea id="e2" placeholder="ประโยค: ...&#10;อธิบาย: ..."></textarea>
+<p><b>ข้อ 3 (3 คะแนน)</b> อธิบายว่าทำไม “ปากกา” จึงเป็นคำประสม โดยพิจารณาจากคำมูลที่นำมารวมกัน</p>
+<textarea id="e3" placeholder="เหตุผล: ..."></textarea>
+<button onclick="finishGame()">🏆 ส่งภารกิจและดูผล</button>
+</div>
+
+<div id="result" class="card result hidden">
+<h1>🎉 จบภารกิจ!</h1>
+<p id="resultName"></p>
+<div class="score"><span id="finalScore">0</span>/12</div>
+<div class="stars" id="stars"></div>
+<h2 id="level"></h2>
+<div class="note">
+<b>คะแนนส่วนปรนัย</b> ตรวจอัตโนมัติ 12 คะแนน<br>
+<b>คะแนนอัตนัย</b> ครูตรวจเพิ่มเติม 8 คะแนน ตามเกณฑ์ Rubric<br>
+<b>เกณฑ์ผ่านทั้งฉบับ:</b> 14/20 คะแนน (70%)
+</div>
+<button onclick="location.reload()">🔄 เล่นอีกครั้ง</button>
+</div>
+<div class="footer">เกมการศึกษา ภาษาไทย ชั้นประถมศึกษาปีที่ 2</div>
+</div>
+
+<script>
+const qs=[
+["คำที่มีความหมายสมบูรณ์ในตัวเอง และไม่สามารถแยกศัพท์ย่อยออกมาได้ หมายถึงคำประเภทใด",["ก. คำมูล","ข. คำซ้ำ","ค. คำประสม","ง. คำซ้อน"],0],
+["คำในข้อใดเป็น “คำมูล” ทุกคำ",["ก. แม่น้ำ, ปากกา","ข. แมว, บ้าน","ค. ถ้วยชาม, ปิดบัง","ง. ท้อแท้, ขัดถู"],1],
+["คำซ้ำมีลักษณะเด่นคือสิ่งใด",["ก. นำคำต่างความหมายมารวมกัน","ข. มีเสียงคล้องจองกันหลายๆ คำ","ค. ใช้เครื่องหมายไม้ยมก (ๆ) ในการกล่าวซ้ำ","ง. แยกออกเป็น 2 คำแล้วไม่เหลือความหมาย"],2],
+["ข้อใดเป็นคำประสมที่สร้างจากคำว่า “แม่” แล้วเกิดความหมายใหม่",["ก. แม่ๆ","ข. แม่และพ่อ","ค. แม่น้ำ","ง. คุณแม่"],2],
+["คำที่เกิดจากการนำคำที่มีความหมายเหมือนกัน คล้ายกัน หรือตรงข้ามกัน มารวมกัน เรียกว่าคำอะไร",["ก. คำประสม","ข. คำซ้อน","ค. คำซ้ำ","ง. คำมูล"],1],
+["ข้อใดคือ “คำซ้อนเพื่อความหมาย”",["ก. ซาบซึ้ง","ข. ท้อแท้","ค. ราบคาบ","ง. ขัดถู"],3],
+["คำซ้อนเพื่อเสียงในข้อใดเป็นการรวมคำเพื่อทำให้เกิดเสียงคล้องจองกัน",["ก. ถ้วยชาม","ข. ปิดบัง","ค. ซาบซึ้ง","ง. แก่เฒ่า"],2],
+["ข้อใดไม่ใช่คำประสม",["ก. ยาดม","ข. ไฟฟ้า","ค. น้ำหวาน","ง. โหระพา"],3],
+["ประโยค “น้องวิ่งช้าๆ จึงเดินตามพี่ไม่ทัน” คำว่า “ช้าๆ” มีจุดประสงค์เพื่ออะไร",["ก. เพื่อเน้นหรือย้ำลักษณะการวิ่ง","ข. เพื่อเปลี่ยนแปลงความหมายเดิมเป็นตรงกันข้าม","ค. เพื่อให้เกิดเสียงสัมผัสกับคำว่า “จึง”","ง. เพื่อสร้างคำใหม่ที่ไม่เกี่ยวข้องกัน"],0],
+["หากนำคำมูลว่า “ตา” และ “เตียง” ไปผสมกับคำอื่น ข้อใดจัดเป็นคำประสมทั้งหมด",["ก. พ่อตา, เตียงนอน","ข. ตาโต, เตียงไม้","ค. ตาปลา, เตียงๆ","ง. ตาทวด, เตียงหัก"],0],
+["“ลูกแมวตัวเล็กๆ กำลังเดินน่ารัก” คำว่า “เล็กๆ” จัดเป็นคำประเภทใด",["ก. คำซ้อน","ข. คำซ้ำ","ค. คำประสม","ง. คำมูล"],1],
+["“แม่ทำแกงส้ม แล้วให้ลูกไปขัดถูถ้วยชาม” คำที่พิมพ์ตัวหนาเป็นคำประเภทใดตามลำดับ",["ก. คำมูล, คำซ้ำ","ข. คำประสม, คำซ้อนเพื่อความหมาย","ค. คำซ้อนเพื่อเสียง, คำประสม","ง. คำซ้ำ, คำมูล"],1]
+];
+let i=0,score=0,name="";
+function startGame(){
+ name=document.getElementById("name").value.trim();
+ if(!name){alert("กรุณากรอกชื่อ-สกุลก่อนเริ่มเกม");return}
+ document.getElementById("start").classList.add("hidden");
+ document.getElementById("game").classList.remove("hidden");
+ document.getElementById("player").textContent="👤 "+name;
+ showQ();
+}
+function showQ(){
+ const q=qs[i]; document.getElementById("num").textContent=i+1;
+ document.getElementById("bar").style.width=((i)/12*100)+"%";
+ document.getElementById("question").textContent=(i+1)+". "+q[0];
+ const c=document.getElementById("choices"); c.innerHTML="";
+ document.getElementById("feedback").textContent="";
+ const next=document.getElementById("next"); next.disabled=true;
+ q[1].forEach((x,n)=>{
+  const b=document.createElement("button"); b.className="choice"; b.textContent=x;
+  b.onclick=()=>answer(n,b); c.appendChild(b);
+ });
+}
+function answer(n,b){
+ document.querySelectorAll(".choice").forEach(x=>x.disabled=true);
+ const correct=qs[i][2];
+ if(n===correct){score++;b.classList.add("correct");document.getElementById("feedback").textContent="✅ ถูกต้อง! +1 คะแนน";}
+ else{b.classList.add("wrong");document.querySelectorAll(".choice")[correct].classList.add("correct");document.getElementById("feedback").textContent="💡 ยังไม่ถูก ข้อนี้ลองจำไว้นะ";}
+ document.getElementById("score").textContent=score;
+ document.getElementById("next").disabled=false;
+}
+function nextQuestion(){
+ i++;
+ if(i<12)showQ();
+ else{
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("essay").classList.remove("hidden");
+ }
+}
+function finishGame(){
+ document.getElementById("essay").classList.add("hidden");
+ document.getElementById("result").classList.remove("hidden");
+ document.getElementById("resultName").textContent="เก่งมาก "+name+"! ผลคะแนนส่วนปรนัย";
+ document.getElementById("finalScore").textContent=score;
+ let stars=score>=11?"⭐⭐⭐⭐⭐":score>=9?"⭐⭐⭐⭐":score>=7?"⭐⭐⭐":score>=5?"⭐⭐":"⭐";
+ document.getElementById("stars").textContent=stars;
+ document.getElementById("level").textContent=score>=11?"🏆 ยอดเยี่ยม! พร้อมก้าวสู่ด่านต่อไป":score>=8?"🌟 ทำได้ดีมาก!":"💪 ฝึกอีกนิด แล้วจะเก่งขึ้นแน่นอน!";
+}
+</script>
+</body>
+</html>
